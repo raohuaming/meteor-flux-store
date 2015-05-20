@@ -13,7 +13,7 @@ Package.describe({
 Package.onUse(function(api) {
   api.versionsFrom('1.1.0.2');
   api.use([
-    'raix:eventemitter',
+    'raix:eventemitter@0.1.2',
     'underscore'
   ], 'client');
   api.export(['FluxStore', 'FluxDispatcher'], 'client');
