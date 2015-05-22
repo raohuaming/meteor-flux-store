@@ -4,6 +4,44 @@
 FluxDispatcher = new EventEmitter();
 
 /**
+ */
+FluxDispatcher.defineEvents = function(eventCheckers){
+  this.__eventCheckers__ = eventCheckers;
+};
+
+/**
+ */
+FluxDispatcher.resetEvents = function(){
+  this.__eventCheckers__ = {};
+};
+
+FluxDispatcher.resetEvents();
+
+/**
+ */
+FluxDispatcher.__on__ = FluxDispatcher.on;
+FluxDispatcher.on = function(eventName, listener){
+  if (this.__eventCheckers__[eventName]) {
+    this.__on__(eventName, listener);
+  } else {
+    throw new Error('You haven\'t defined the event: ' + eventName + ', please use FluxDispatcher.defineEvents to define it!');
+  }
+};
+
+/**
+ */
+FluxDispatcher.__emit__ = FluxDispatcher.emit;
+FluxDispatcher.emit = function(eventName, event){
+  if (this.__eventCheckers__[eventName]) {
+    check(event, this.__eventCheckers__[eventName]);
+    this.__emit__(eventName, event);
+  } else {
+    throw new Error('You haven\'t defined the event: ' + eventName + ', please use FluxDispatcher.defineEvents to define it!');
+  }
+};
+
+
+/**
  * FluxStore contructor
  * @constructor
  */

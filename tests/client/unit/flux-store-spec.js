@@ -1,8 +1,8 @@
 describe('FluxStore', function(){
-  var store;
 
   beforeEach(function(){
     FluxStore.reset();
+    FluxDispatcher.resetEvents();
   });
 
   describe('.define', function(){
@@ -76,6 +76,11 @@ describe('FluxStore', function(){
 
       it('should register events to configured Dispatcher', function(done){
         var handle = jasmine.createSpy('handle');
+        FluxDispatcher.defineEvents({
+          'event1': {
+            msg: String
+          }
+        });
         FluxStore.define('store', {
           register: {
             'event1': handle

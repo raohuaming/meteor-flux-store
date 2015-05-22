@@ -14,7 +14,8 @@ Package.onUse(function(api) {
   api.versionsFrom('1.1.0.2');
   api.use([
     'raix:eventemitter@0.1.2',
-    'underscore'
+    'underscore',
+    'check'
   ], 'client');
   api.export(['FluxStore', 'FluxDispatcher'], 'client');
   api.addFiles('flux-store.js', 'client');
@@ -27,5 +28,8 @@ Package.onTest(function(api) {
     'raix:eventemitter'
   ]);
   api.use('huaming:flux-store');
-  api.addFiles('tests/client/unit/flux-store-spec.js', 'client');
+  api.addFiles([
+    'tests/client/unit/flux-store-spec.js',
+    'tests/client/unit/flux-dispatcher-spec.js'
+  ], 'client');
 });
