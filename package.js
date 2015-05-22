@@ -1,6 +1,6 @@
 Package.describe({
   name: 'huaming:flux-store',
-  version: '0.0.3',
+  version: '0.0.4',
   // Brief, one-line summary of the package.
   summary: 'This is a Simple Store for meteor inspired by Facebook Flux, by using EventEmitter',
   // URL to the Git repository containing the source code for this package.
