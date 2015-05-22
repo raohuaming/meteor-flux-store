@@ -200,7 +200,7 @@ FluxStore.fetch = function(storeName){
     if ( store.defaultStates ) { store.__setDefaultStates__(); }
     if ( store.initStates  ) { store.__setInitStates__(); }
     if ( store.register ) { store.__registerEvents__(); }
-    this.__initialized__ = true;
+    store.__initialized__ = true;
   }
   return store;
 };
