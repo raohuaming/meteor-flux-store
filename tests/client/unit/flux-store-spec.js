@@ -100,6 +100,7 @@ describe('FluxStore', function(){
           FluxStore.define('store', {
             register: 'A'
           });
+          FluxStore.fetch('store');
         }).toThrowError();
       });
 
@@ -110,6 +111,7 @@ describe('FluxStore', function(){
               'event': 'A'
             }
           });
+          FluxStore.fetch('store');
         }).toThrowError();
       });
     });

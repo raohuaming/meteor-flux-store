@@ -187,7 +187,6 @@ FluxStore.define = function(name, extension){
     var store = new FluxStore(name);
     FluxStore.__stores__[name] = store;
     _.extend(store, extension);
-    if ( store.register ) { store.__registerEvents__(); }
   });
 };
 
@@ -200,6 +199,7 @@ FluxStore.fetch = function(storeName){
   if ( !store.__initialized__ ) {
     if ( store.defaultStates ) { store.__setDefaultStates__(); }
     if ( store.initStates  ) { store.__setInitStates__(); }
+    if ( store.register ) { store.__registerEvents__(); }
     this.__initialized__ = true;
   }
   return store;
