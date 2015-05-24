@@ -15,7 +15,8 @@ Package.onUse(function(api) {
   api.use([
     'raix:eventemitter@0.1.2',
     'underscore',
-    'check'
+    'check',
+    'reactive-dict'
   ], 'client');
   api.export(['FluxStore', 'FluxDispatcher'], 'client');
   api.addFiles('flux-store.js', 'client');

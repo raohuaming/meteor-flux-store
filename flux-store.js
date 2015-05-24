@@ -47,7 +47,7 @@ FluxDispatcher.emit = function(eventName, event){
  * @constructor
  */
 FluxStore = function(){
-  //ReactiveDict.call(this, name);
+  this.__reactiveDict__ = new ReactiveDict();
   this.__initialized__ = false;
   this.__states__ = {};
   this.__events__ = {};
@@ -72,7 +72,8 @@ FluxStore.config({
  * @param: { any } value
  */
 FluxStore.prototype.set = function(state, value){
-  this.__states__[state] = value;
+  //this.__states__[state] = value;
+  this.__reactiveDict__.set(state, value);
 };
 
 /**
@@ -80,7 +81,8 @@ FluxStore.prototype.set = function(state, value){
  * @param: { string } state
  */
 FluxStore.prototype.get = function(state) {
-  return this.__states__[state];
+  //return this.__states__[state];
+  return this.__reactiveDict__.get(state);
 };
 
 /**
@@ -100,7 +102,7 @@ FluxStore.prototype.setDefault = function(state, value) {
  * @param: { function } handle
  */
 FluxStore.prototype.__setStates__ = function(states, handle){
-  if (typeof states === 'object'){
+  if ( Match.test(states, Object) ){
     var that = this;
     _.each(states, function(value, state){
       if (typeof value === 'function') {
