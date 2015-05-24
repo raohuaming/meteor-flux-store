@@ -12,6 +12,7 @@ FluxDispatcher.defineEvents = function(eventCheckers){
 /**
  */
 FluxDispatcher.resetEvents = function(){
+  this.removeAllListeners();
   this.__eventCheckers__ = {};
 };
 
@@ -209,7 +210,7 @@ FluxStore.reset = function(){
   _.each(FluxStore.__stores__, function(store){
     _.each(store.__events__, function(eventHandles, eventName){
       _.each(eventHandles, function(eventHandle){
-        FluxStore.__dispatcher__.removeAllListeners(eventName, eventHandle);
+        FluxStore.__dispatcher__.removeListener(eventName, eventHandle);
       });
     });
   });
