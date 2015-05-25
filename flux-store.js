@@ -47,9 +47,12 @@ FluxDispatcher.emit = function(eventName, event){
  * @constructor
  */
 FluxStore = function(){
-  this.__reactiveDict__ = new ReactiveDict();
-  this.__initialized__ = false;
-  this.__states__ = {};
+  this.states = new ReactiveDict();
+  this.deps = {};
+  this.__config__ = {
+    exports: {},
+    registers: {}
+  };
   this.__events__ = {};
 };
 
@@ -67,22 +70,18 @@ FluxStore.config({
 
 
 /**
- * set state
- * @param: { string } state
- * @param: { any } value
- */
-FluxStore.prototype.set = function(state, value){
-  //this.__states__[state] = value;
-  this.__reactiveDict__.set(state, value);
-};
-
-/**
  * get state
  * @param: { string } state
  */
-FluxStore.prototype.get = function(state) {
+FluxStore.prototype.get = function(exportName) {
   //return this.__states__[state];
-  return this.__reactiveDict__.get(state);
+  //return this.states.get(state);
+  var exportHandle = this.__config__.exports[exportName];
+  if (exportHandle) {
+    return exportHandle.apply(this);
+  } else {
+    throw new Error('This export: ' + exportName + ' is not defined in the store');
+  }
 };
 
 /**
@@ -95,6 +94,7 @@ FluxStore.prototype.setDefault = function(state, value) {
     this.set(state, value);
   }
 };
+
 
 /**
  * iterate the given objects to set up states based on given handle
@@ -141,9 +141,10 @@ FluxStore.prototype.__setDefaultStates__ = function(){
  * iterate this.register to register FluxDispatcher events and this.__events__
  */
 FluxStore.prototype.__registerEvents__ = function(){
-  if (this.register && (typeof this.register === 'object') ){
+  if ( !this.__config__.registers ) return;
+  if (typeof this.__config__.registers === 'object' ){
     var that = this;
-    _.each(this.register, function(handle, eventName){
+    _.each(this.__config__.registers, function(handle, eventName){
       if (typeof handle === 'function') {
         that.__events__[eventName] = that.__events__[eventName] || [];
         FluxStore.__dispatcher__.on(eventName, handle.bind(that));
@@ -168,19 +169,18 @@ FluxStore.__stores__ = {};
  * @param: { string } name
  * @param: { object } extension
  * @usage: FluxStore.define('name', {
- *  initStates: {
- *    state1: function(){
+ *  deps: {
+ *    Model: Model,
+ *    Service: Service
+ *  },
+ *  exports: {
+ *    name: function(){
  *      return 'A';
  *    }
  *  },
- *  defaultStates: {
- *    state2: function(){
- *      return 'B';
- *    }
- *  },
- *  register: {
+ *  registers: {
  *    event1: function(event){
- *      .....
+ *      ...
  *    }
  *  }
  * });
@@ -189,21 +189,39 @@ FluxStore.define = function(name, extension){
   Meteor.startup(function(){
     var store = new FluxStore(name);
     FluxStore.__stores__[name] = store;
+    if ( extension.exports ) {
+      store.__config__.exports = extension.exports;
+    }
+    if ( extension.registers ) {
+      store.__config__.registers = extension.registers;
+    }
+    delete extension.exports;
+    delete extension.registers;
     _.extend(store, extension);
+    store.__registerEvents__();
   });
+};
+
+FluxStore.prototype.config = function(config){
+  var that = this;
+  if ( config.deps ) {
+    _.extend(this.deps, config.deps);
+  }
+  if ( config.initStates ) {
+    _.each(config.initStates, function(value, state){
+      that.states.set(state, value);
+    });
+  }
 };
 
 /**
  * use to fetch named store
  * @param: { string } storeName
  */
-FluxStore.fetch = function(storeName){
+FluxStore.fetch = function(storeName, config){
   var store = FluxStore.__stores__[storeName];
-  if ( !store.__initialized__ ) {
-    if ( store.defaultStates ) { store.__setDefaultStates__(); }
-    if ( store.initStates  ) { store.__setInitStates__(); }
-    if ( store.register ) { store.__registerEvents__(); }
-    store.__initialized__ = true;
+  if (config) {
+    store.config(config);
   }
   return store;
 };

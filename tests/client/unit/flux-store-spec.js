@@ -7,63 +7,36 @@ describe('FluxStore', function(){
 
   describe('.define', function(){
 
-    describe('-- initStates',function(){
-      it('should accept a function to initialize states', function(){
+    describe('-- deps',function(){
+      it ('should set deps', function(){
+        var Dep = {
+          name: 'Dep'
+        };
+
         FluxStore.define('store', {
-          initStates: {
-            name: function(){
-              return 'Huaming';
-            }
+          deps: {
+            Dep: Dep
           }
         });
+
         var store = FluxStore.fetch('store');
-        expect(store.get('name')).toEqual('Huaming');
-      });
+        expect(store.deps.Dep).toEqual(Dep);
 
-      it('should throw error while pass non-objects to initStates', function(){
-        FluxStore.define('store', {
-          initStates: function(){}
-        });
-        expect(function(){ FluxStore.fetch('store'); }).toThrowError();
-      });
-
-      it('should throw error while pass a object instead of function to a state', function(){
-        FluxStore.define('store', {
-          initStates: {
-            name: 'Huaming'
-          }
-        });
-        expect(function(){ FluxStore.fetch('store'); }).toThrowError();
       });
     });
 
-    describe('-- defaultStates', function(){
-      it('should accept a function to initialize default states', function(){
+    describe('-- exports ', function(){
+      it('should set exports in __config__', function(){
+        var handle = function(){
+          return 'A';
+        };
         FluxStore.define('store', {
-          defaultStates: {
-            name: function(){
-              return 'Huaming';
-            }
+          exports: {
+            name: handle
           }
         });
         var store = FluxStore.fetch('store');
-        expect(store.get('name')).toEqual('Huaming');
-      });
-
-      it('should throw error while pass non-objects to defaultStates', function(){
-        FluxStore.define('store', {
-          defaultStates: function(){}
-        });
-        expect(function(){ FluxStore.fetch('store'); }).toThrowError();
-      });
-
-      it('should throw error while pass a object instead of function to a state', function(){
-        FluxStore.define('store', {
-          defaultStates: {
-            name: 'Huaming'
-          }
-        });
-        expect(function(){ FluxStore.fetch('store'); }).toThrowError();
+        expect(store.__config__.exports.name).toEqual(handle);
       });
 
     });
@@ -74,7 +47,7 @@ describe('FluxStore', function(){
         FluxDispatcher.removeAllListeners();
       });
 
-      it('should register events to configured Dispatcher', function(done){
+      it('should register events to configured Dispatcher', function(){
         var handle = jasmine.createSpy('handle');
         FluxDispatcher.defineEvents({
           'event1': {
@@ -82,36 +55,30 @@ describe('FluxStore', function(){
           }
         });
         FluxStore.define('store', {
-          register: {
+          registers: {
             'event1': handle
           }
         });
-        FluxStore.fetch('store');
         FluxDispatcher.on('event1', handle);
         FluxDispatcher.emit('event1', { msg: 'hello' });
-        setTimeout(function(){
-          expect(handle).toHaveBeenCalledWith({ msg: 'hello' });
-          done();
-        }, 100);
+        expect(handle).toHaveBeenCalledWith({ msg: 'hello' });
       });
 
       it('should throw error while passing a non-object parameter', function(){
         expect(function(){
           FluxStore.define('store', {
-            register: 'A'
+            registers: 'A'
           });
-          FluxStore.fetch('store');
         }).toThrowError();
       });
 
       it('should throw error while passing a non-function handle to register', function(){
         expect(function(){
           FluxStore.define('store', {
-            register: {
+            registers: {
               'event': 'A'
             }
           });
-          FluxStore.fetch('store');
         }).toThrowError();
       });
     });
@@ -121,51 +88,60 @@ describe('FluxStore', function(){
   describe('.fetch', function(){
     it('should return the named store', function(){
       FluxStore.define('store', {
-        initStates: {
-          name: function(){
-            return 'A';
-          }
-        }
       });
       expect(FluxStore.fetch('store')).toBeDefined();
     });
 
-    it('should initizlize the states while fetched', function(){
-      FluxStore.define('store', {
-        initStates: {
-          name: function(){
-            return 'A';
-          }
-        }
-      });
-      expect(FluxStore.__stores__['store']).toBeDefined();
-      expect(FluxStore.__stores__['store'].get('name')).toBeUndefined();
-      expect(FluxStore.fetch('store').get('name')).toBeDefined();
-    });
-
   });
 
-  describe('#set', function(){
-    it('should set a named state', function(){
+  describe('#config', function(){
+
+    it('should set a new Deps by given new dep', function(){
+      var Dep1, Dep2, Dep3, store;
+
+      Dep1 = { name: 'Dep1' };
+      Dep2 = { name: 'Dep2' };
+      Dep3 = { name: 'Dep3' };
       FluxStore.define('store', {
-        initStates: {
-          name: function(){
-            return 'A';
-          }
+        deps: {
+          Dep1: Dep1,
+          Dep2: Dep2
         }
       });
-      var store = FluxStore.fetch('store');
-      expect(store.get('name')).toEqual('A');
-      store.set('name', 'B');
-      expect(store.get('name')).toEqual('B');
+      store = FluxStore.fetch('store');
+
+      expect(store.deps.Dep1).toEqual(Dep1);
+      expect(store.deps.Dep2).toEqual(Dep2);
+      store.config({
+        deps: {
+          Dep1: Dep3
+        }
+      });
+      expect(store.deps.Dep1).toEqual(Dep3);
+      expect(store.deps.Dep2).toEqual(Dep2);
     });
 
+
+
+    it('should set store\'s init states', function(){
+      FluxStore.define('store', {
+      });
+      store = FluxStore.fetch('store');
+      expect(store.states.get('name')).toBeUndefined();
+
+      store.config({
+        initStates: {
+          name: 'A'
+        }
+      });
+      expect(store.states.get('name')).toEqual('A');
+    });
   });
 
   describe('#get', function(){
     it('should set a named state', function(){
       FluxStore.define('store', {
-        initStates: {
+        exports: {
           name: function(){
             return 'A';
           }
@@ -173,27 +149,6 @@ describe('FluxStore', function(){
       });
       var store = FluxStore.fetch('store');
       expect(store.get('name')).toEqual('A');
-      store.set('name', 'B');
-      expect(store.get('name')).toEqual('B');
-    });
-
-  });
-
-  describe('#setDefault', function(){
-    it('should set default for a named state', function(){
-      FluxStore.define('store', {
-        initStates: {
-          name: function(){
-            return 'A';
-          }
-        }
-      });
-      var store = FluxStore.fetch('store');
-      expect(store.get('name')).toEqual('A');
-      store.setDefault('name', 10);
-      expect(store.get('name')).toEqual('A');
-      store.setDefault('score', 10);
-      expect(store.get('score')).toEqual(10);
     });
 
   });

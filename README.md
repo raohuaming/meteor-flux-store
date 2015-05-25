@@ -42,17 +42,19 @@ This is define a store named storeName, you can pass config to configure it like
 
 ```
   FluxStore.define('storeName', {
-    initStates: {
-      state1: function(){
-        return 'state1 value';
-      }
+    deps: {
+      Dep1: Dep1,
+      Dep2: Dep2
     },
-    defaultStates: {
-      state2: function(){
+    exports: {
+      name: function(){
         return 'state2 default value';
+      },
+      allUsers: function(){
+        return this.deps.Dep1.find(this.states.get('name'));
       }
     },
-    register: {
+    registers: {
       event1: {
         this.otherFunction();
       }
@@ -63,21 +65,43 @@ This is define a store named storeName, you can pass config to configure it like
   });
 ```
 
-### FluxStore.fetch('storeName')
+### FluxStore.fetch(storeName, config)
 
-After defining stores by FluxStore.define, then you can fetch a given store by calling this function:
+After defining stores by FluxStore.define, then you can fetch a given store by calling this function, and optionally configure its deps and init states:
 
 ```
-  var Store = FluxStore.fetch('store');
-  Store.set('myName', 'Altman');
-  console.log(Store.get('myName'));
+  var Store = FluxStore.fetch('store',{
+    deps: {
+      Dep1: newDep1
+    },
+    initStates: {
+      currentStatus: '1'
+    }
+  });
   FluxDispatcher.emit('event1', { _id: '1111', updated: { score: 10 }});
+  expect(Store.deps.Dep1).toEqual(newDep1);
+  expect(Store.states.get('currentStatus')).toEqual('1');
+
 ``` 
 
-### store.get('stateName')
-### store.set('stateName', stateValue)
+### store.config(config)
 
-It gets and sets the state in the store. It is actually the same to ReactiveDict#get and ReactiveDict#.set
+This configures store's deps and init states:
+
+```
+  store.config({
+    deps: {
+      Dep1: newDep1
+    },
+    initStates: {
+      currentStatus: '1'
+    }
+  })
+```
+
+### store.get('stateName')
+
+It gets the export state defined in exports while defining the store. It will throw error if you get a unknown export.
 
 # Testing
 
