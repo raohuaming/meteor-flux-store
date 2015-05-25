@@ -41,6 +41,23 @@ describe('FluxStore', function(){
 
     });
 
+    describe(' -- initStates', function(){
+      it('should set initStates in __config__ and check initStates while being fetched', function(){
+        var checker = {
+          name: String
+        };
+        FluxStore.define('store', {
+          initStates: checker
+        });
+        var store = FluxStore.fetch('store', {
+          initStates: {
+            name: 'A'
+          }
+        });
+        expect(store.__config__.initStates).toEqual(checker);
+      });
+    });
+
     describe('-- register events', function(){
 
       beforeEach(function(){
@@ -90,6 +107,17 @@ describe('FluxStore', function(){
       FluxStore.define('store', {
       });
       expect(FluxStore.fetch('store')).toBeDefined();
+    });
+
+    it('should throw Match.Error while not giving the required init states', function(){
+      FluxStore.define('store', {
+        initStates: {
+          name: String
+        }
+      });
+      expect(function(){
+        var store = FluxStore.fetch('store');
+      }).toThrowError(Match.Error);
     });
 
   });

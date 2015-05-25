@@ -51,7 +51,8 @@ FluxStore = function(){
   this.deps = {};
   this.__config__ = {
     exports: {},
-    registers: {}
+    registers: {},
+    initStates: Match.Any
   };
   this.__events__ = {};
 };
@@ -189,14 +190,21 @@ FluxStore.define = function(name, extension){
   Meteor.startup(function(){
     var store = new FluxStore(name);
     FluxStore.__stores__[name] = store;
-    if ( extension.exports ) {
+    check(extension.exports, Match.Optional(Object));
+    check(extension.registers, Match.Optional(Object));
+    check(extension.initStates, Match.Optional(Object));
+    if (  extension.exports ) {
       store.__config__.exports = extension.exports;
     }
     if ( extension.registers ) {
       store.__config__.registers = extension.registers;
     }
+    if (extension.initStates) {
+      store.__config__.initStates = extension.initStates;
+    }
     delete extension.exports;
     delete extension.registers;
+    delete extension.initStates;
     _.extend(store, extension);
     store.__registerEvents__();
   });
@@ -219,7 +227,11 @@ FluxStore.prototype.config = function(config){
  * @param: { string } storeName
  */
 FluxStore.fetch = function(storeName, config){
+  config = config || {};
   var store = FluxStore.__stores__[storeName];
+  if ( store.__config__.initStates ) {
+    check( config.initStates, store.__config__.initStates );
+  }
   if (config) {
     store.config(config);
   }

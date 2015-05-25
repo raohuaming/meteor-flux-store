@@ -46,6 +46,9 @@ This is define a store named storeName, you can pass config to configure it like
       Dep1: Dep1,
       Dep2: Dep2
     },
+    initStates: {
+      name: String
+    },
     exports: {
       name: function(){
         return 'state2 default value';
@@ -67,7 +70,7 @@ This is define a store named storeName, you can pass config to configure it like
 
 ### FluxStore.fetch(storeName, config)
 
-After defining stores by FluxStore.define, then you can fetch a given store by calling this function, and optionally configure its deps and init states:
+After defining stores by FluxStore.define, then you can fetch a given store by calling this function, and configure its deps and init states. It will check whether the passed initStates match the checker defined in initStates, as shown above.
 
 ```
   var Store = FluxStore.fetch('store',{
