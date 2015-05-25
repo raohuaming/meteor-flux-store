@@ -79,6 +79,7 @@ describe('FluxStore', function(){
             'event1': handle
           }
         });
+        FluxStore.fetch('store');
         FluxDispatcher.on('event1', handle);
         FluxDispatcher.emit('event1', { msg: 'hello' });
         expect(handle).toHaveBeenCalledWith({ msg: 'hello' });
@@ -89,6 +90,7 @@ describe('FluxStore', function(){
           FluxStore.define('store', {
             registers: 'A'
           });
+          FluxStore.fetch('store');
         }).toThrowError();
       });
 
@@ -99,6 +101,7 @@ describe('FluxStore', function(){
               'event': 'A'
             }
           });
+          FluxStore.fetch('store');
         }).toThrowError();
       });
     });

@@ -214,7 +214,6 @@ FluxStore.define = function(name, extension){
     delete extension.registers;
     delete extension.initStates;
     _.extend(store, extension);
-    store.__registerEvents__();
   });
 };
 
@@ -246,6 +245,7 @@ FluxStore.fetch = function(storeName, config){
   if (config) {
     store.config(config);
   }
+  store.__registerEvents__();
   return store;
 };
 
