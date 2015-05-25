@@ -52,7 +52,8 @@ FluxStore = function(){
   this.__config__ = {
     exports: {},
     registers: {},
-    initStates: Match.Any
+    initStates: Match.Any,
+    deps: Match.Any
   };
   this.__events__ = {};
 };
@@ -142,7 +143,9 @@ FluxStore.prototype.__setDefaultStates__ = function(){
  * iterate this.register to register FluxDispatcher events and this.__events__
  */
 FluxStore.prototype.__registerEvents__ = function(){
-  if ( !this.__config__.registers ) return;
+  if ( !this.__config__.registers ) {
+    return;
+  }
   if (typeof this.__config__.registers === 'object' ){
     var that = this;
     _.each(this.__config__.registers, function(handle, eventName){
@@ -193,6 +196,10 @@ FluxStore.define = function(name, extension){
     check(extension.exports, Match.Optional(Object));
     check(extension.registers, Match.Optional(Object));
     check(extension.initStates, Match.Optional(Object));
+    check(extension.deps, Match.Optional(Object));
+    if (  extension.deps ) {
+      store.__config__.deps = extension.deps;
+    }
     if (  extension.exports ) {
       store.__config__.exports = extension.exports;
     }
@@ -202,6 +209,7 @@ FluxStore.define = function(name, extension){
     if (extension.initStates) {
       store.__config__.initStates = extension.initStates;
     }
+    delete extension.deps;
     delete extension.exports;
     delete extension.registers;
     delete extension.initStates;
@@ -231,6 +239,9 @@ FluxStore.fetch = function(storeName, config){
   var store = FluxStore.__stores__[storeName];
   if ( store.__config__.initStates ) {
     check( config.initStates, store.__config__.initStates );
+  }
+  if ( store.__config__.deps ) {
+    check( config.deps, store.__config__.deps );
   }
   if (config) {
     store.config(config);

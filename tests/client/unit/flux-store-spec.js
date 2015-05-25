@@ -8,19 +8,22 @@ describe('FluxStore', function(){
   describe('.define', function(){
 
     describe('-- deps',function(){
-      it ('should set deps', function(){
-        var Dep = {
-          name: 'Dep'
+      it ('should set deps in __config__', function(){
+
+        var depsChecker = {
+          Dep: String
         };
 
         FluxStore.define('store', {
-          deps: {
-            Dep: Dep
-          }
+          deps: depsChecker
         });
 
-        var store = FluxStore.fetch('store');
-        expect(store.deps.Dep).toEqual(Dep);
+        var store = FluxStore.fetch('store', {
+          deps: {
+            Dep: '10'
+          }
+        });
+        expect(store.__config__.deps).toEqual(depsChecker);
 
       });
     });
@@ -109,15 +112,36 @@ describe('FluxStore', function(){
       expect(FluxStore.fetch('store')).toBeDefined();
     });
 
-    it('should throw Match.Error while not giving the required init states', function(){
+    it('should throw Match.Error while not giving the correct init states', function(){
       FluxStore.define('store', {
         initStates: {
           name: String
         }
       });
       expect(function(){
-        var store = FluxStore.fetch('store');
+        FluxStore.fetch('store');
       }).toThrowError(Match.Error);
+    });
+
+    it('should throw Match.Error while not giving the correct deps', function(){
+      FluxStore.define('store', {
+        deps: {
+          Dep: {
+            name: String
+          }
+        }
+      });
+      expect(function(){
+        FluxStore.fetch('store');
+      }).toThrowError(Match.Error);
+      expect(function(){
+        FluxStore.fetch('store', {
+          deps: {
+            Dep: { name: 'A' }
+          }
+        });
+      }).not.toThrowError(Match.Error);
+
     });
 
   });
@@ -128,15 +152,24 @@ describe('FluxStore', function(){
       var Dep1, Dep2, Dep3, store;
 
       Dep1 = { name: 'Dep1' };
-      Dep2 = { name: 'Dep2' };
+      Dep2 = { score: 1000 };
       Dep3 = { name: 'Dep3' };
       FluxStore.define('store', {
+        deps: {
+          Dep1: {
+            name: String
+          },
+          Dep2: {
+            score: Match.Integer
+          }
+        }
+      });
+      store = FluxStore.fetch('store', {
         deps: {
           Dep1: Dep1,
           Dep2: Dep2
         }
       });
-      store = FluxStore.fetch('store');
 
       expect(store.deps.Dep1).toEqual(Dep1);
       expect(store.deps.Dep2).toEqual(Dep2);

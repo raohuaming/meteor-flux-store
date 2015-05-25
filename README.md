@@ -43,8 +43,8 @@ This is define a store named storeName, you can pass config to configure it like
 ```
   FluxStore.define('storeName', {
     deps: {
-      Dep1: Dep1,
-      Dep2: Dep2
+      Dep1: { name: String },
+      Dep2: { score: Match.Integer }
     },
     initStates: {
       name: String
@@ -70,12 +70,17 @@ This is define a store named storeName, you can pass config to configure it like
 
 ### FluxStore.fetch(storeName, config)
 
-After defining stores by FluxStore.define, then you can fetch a given store by calling this function, and configure its deps and init states. It will check whether the passed initStates match the checker defined in initStates, as shown above.
+After defining stores by FluxStore.define, then you can fetch a given
+store by calling this function, and configure its deps and init states.
+It will check whether the passed initStates match the checker defined in
+initStates, as shown above. It will also check whether the passed deps
+match the checker defined in deps, as shown above.
 
 ```
   var Store = FluxStore.fetch('store',{
     deps: {
-      Dep1: newDep1
+      Dep1: { name: 'A' },
+      Dep2: { score: 1000 }
     },
     initStates: {
       currentStatus: '1'
